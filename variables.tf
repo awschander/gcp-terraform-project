@@ -1,7 +1,7 @@
 variable "project_id" {
   description = "GCP Project ID"
   type        = string
-  default     =  "project-with-cka"
+  default     = "project-with-cka"
 }
 
 variable "region" {
@@ -19,5 +19,5 @@ variable "zone" {
 variable "bucket_name" {
   description = "Cloud Storage bucket name (must be globally unique)"
   type        = string
-  default = "project-with-cka-tfstate-bucket-name"
+  default     = "project-with-cka-tfstate-bucket-name"
 }

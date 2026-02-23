@@ -10,7 +10,7 @@ terraform {
 
   # Store Terraform state in a GCS bucket (create this bucket manually once)
   backend "gcs" {
-    bucket = "project-with-cka-tfstate-bucket-name"   # <-- change this
+    bucket = "project-with-cka-tfstate-bucket-name" # <-- change this
     prefix = "terraform/state"
   }
 }

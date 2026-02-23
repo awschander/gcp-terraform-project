@@ -4,7 +4,7 @@
 
 resource "google_compute_network" "vpc" {
   name                    = "my-vpc"
-  auto_create_subnetworks = false   # We create subnets manually
+  auto_create_subnetworks = false # We create subnets manually
 }
 
 # Subnet for the VM

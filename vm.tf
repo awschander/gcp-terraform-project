@@ -21,13 +21,13 @@ resource "google_storage_bucket_iam_member" "vm_bucket_access" {
 
 resource "google_compute_instance" "vm" {
   name         = "my-vm"
-  machine_type = "e2-micro"   # Free tier eligible
+  machine_type = "e2-micro" # Free tier eligible
   zone         = var.zone
 
   boot_disk {
     initialize_params {
       image = "debian-cloud/debian-12"
-      size  = 20  # GB
+      size  = 20 # GB
     }
   }
 

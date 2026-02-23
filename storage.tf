@@ -5,7 +5,7 @@
 resource "google_storage_bucket" "bucket" {
   name          = var.bucket_name
   location      = var.region
-  force_destroy = true   # Allows terraform destroy to delete non-empty bucket
+  force_destroy = true # Allows terraform destroy to delete non-empty bucket
 
   # Block all public access
   public_access_prevention = "enforced"
@@ -25,16 +25,16 @@ resource "google_compute_global_address" "psc_endpoint_ip" {
   purpose      = "PRIVATE_SERVICE_CONNECT"
   address_type = "INTERNAL"
   network      = google_compute_network.vpc.id
-  address      = "10.0.2.2"   # A free IP outside your subnet range
+  address      = "10.0.2.2" # A free IP outside your subnet range
 }
 
 # Create the Private Service Connect endpoint pointing to Cloud Storage
 resource "google_compute_global_forwarding_rule" "psc_storage" {
   name                  = "storage-psc-endpoint"
-  target                = "all-apis"    # Covers all Google APIs including Storage
+  target                = "all-apis" # Covers all Google APIs including Storage
   network               = google_compute_network.vpc.id
   ip_address            = google_compute_global_address.psc_endpoint_ip.id
-  load_balancing_scheme = ""            # Must be empty for PSC
+  load_balancing_scheme = "" # Must be empty for PSC
 }
 
 # ──────────────────────────────────────────
