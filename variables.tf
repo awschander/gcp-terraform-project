@@ -18,5 +18,5 @@ variable "zone" {
 variable "bucket_name" {
   description = "Cloud Storage bucket name (must be globally unique)"
   type        = string
-  default     = "project-with-cka-app-bucket"
+  default     = "cka-app-bucket-2026"
 }
