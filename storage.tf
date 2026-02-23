@@ -21,7 +21,7 @@ resource "google_storage_bucket" "bucket" {
 
 # Reserve a private IP for the endpoint
 resource "google_compute_global_address" "psc_endpoint_ip" {
-  name         = "storage-psc-ip"
+  name         = "psc-storage"
   purpose      = "PRIVATE_SERVICE_CONNECT"
   address_type = "INTERNAL"
   network      = google_compute_network.vpc.id
