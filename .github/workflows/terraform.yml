@@ -1,0 +1,101 @@
+name: Terraform GCP Infrastructure
+
+on:
+  # Manual trigger — choose plan / apply / destroy from GitHub UI
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Terraform action to run"
+        required: true
+        default: "plan"
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+
+  # Auto plan on any Pull Request touching terraform files
+  pull_request:
+    branches: [main]
+    paths:
+      - "terraform/**"
+
+env:
+  TF_VERSION: "1.6.0"
+  WORKING_DIR: "./terraform"
+
+jobs:
+  terraform:
+    name: Terraform ${{ github.event.inputs.action || 'plan' }}
+    runs-on: ubuntu-latest
+
+    # Minimal permissions needed for JSON key auth
+    permissions:
+      contents: read
+
+    steps:
+      # ── Step 1: Checkout code ──────────────────────────────
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # ── Step 2: Authenticate to GCP using JSON Key ─────────
+      # GCP_CREDENTIALS secret contains the full terraform-key.json content
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      # ── Step 3: Install Terraform ───────────────────────────
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      # ── Step 4: Terraform Init ──────────────────────────────
+      # Connects to GCS backend bucket for remote state
+      # NOTE: bucket name in provider.tf must NOT have gs:// prefix
+      - name: Terraform Init
+        working-directory: ${{ env.WORKING_DIR }}
+        run: terraform init
+
+      # ── Step 5: Terraform Format Check ─────────────────────
+      # Fails if any .tf file is not properly formatted
+      - name: Terraform Format Check
+        working-directory: ${{ env.WORKING_DIR }}
+        run: terraform fmt -check
+
+      # ── Step 6: Terraform Validate ──────────────────────────
+      # Checks syntax and internal consistency of terraform files
+      - name: Terraform Validate
+        working-directory: ${{ env.WORKING_DIR }}
+        run: terraform validate
+
+      # ── Step 7: Terraform Plan ──────────────────────────────
+      # Always runs — shows what will be created/changed/destroyed
+      # Saves plan to tfplan file for apply step to use
+      - name: Terraform Plan
+        working-directory: ${{ env.WORKING_DIR }}
+        run: |
+          terraform plan \
+            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
+            -var="bucket_name=${{ secrets.GCP_BUCKET_NAME }}" \
+            -out=tfplan
+
+      # ── Step 8: Terraform Apply ─────────────────────────────
+      # Only runs when manually triggered with action = 'apply'
+      # Uses the saved tfplan so exactly what was planned gets applied
+      - name: Terraform Apply
+        if: github.event.inputs.action == 'apply'
+        working-directory: ${{ env.WORKING_DIR }}
+        run: terraform apply -auto-approve tfplan
+
+      # ── Step 9: Terraform Destroy ───────────────────────────
+      # Only runs when manually triggered with action = 'destroy'
+      # Deletes all resources created by this project
+      - name: Terraform Destroy
+        if: github.event.inputs.action == 'destroy'
+        working-directory: ${{ env.WORKING_DIR }}
+        run: |
+          terraform destroy -auto-approve \
+            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
+            -var="bucket_name=${{ secrets.GCP_BUCKET_NAME }}"
