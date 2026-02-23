@@ -30,7 +30,7 @@ resource "google_compute_global_address" "psc_endpoint_ip" {
 
 # Create the Private Service Connect endpoint pointing to Cloud Storage
 resource "google_compute_global_forwarding_rule" "psc_storage" {
-  name                  = "storage-psc-endpoint"
+  name                  = "psc-storage"
   target                = "all-apis" # Covers all Google APIs including Storage
   network               = google_compute_network.vpc.id
   ip_address            = google_compute_global_address.psc_endpoint_ip.id
