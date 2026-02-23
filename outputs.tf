@@ -18,8 +18,3 @@ output "vm_internal_ip" {
 output "bucket_name" {
   value = google_storage_bucket.bucket.name
 }
-
-output "psc_endpoint_ip" {
-  description = "Private IP used to reach Cloud Storage from within the VPC"
-  value       = google_compute_global_address.psc_endpoint_ip.address
-}
